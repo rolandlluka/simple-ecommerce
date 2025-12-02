@@ -1,5 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,10 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/layouts/app-layout';
 import { Heading } from '@/components/heading';
 import cartRoutes from '@/routes/cart';
 import productsRoutes from '@/routes/products';
+import { type SharedData } from '@/types';
+import { showToast } from '@/components/toast-container';
 
 interface Product {
   id: number;
@@ -36,9 +39,20 @@ interface Props {
 
 export default function ProductsIndex({ products }: Props) {
   const [processing, setProcessing] = useState(false);
+  const { props } = usePage<SharedData & { flash?: { success?: string } }>();
+  const cartCount = props.cartCount || 0;
+  const flashMessage = props.flash?.success;
+
+  useEffect(() => {
+    if (flashMessage) {
+      showToast(flashMessage, 'success');
+    }
+  }, [flashMessage]);
 
   const handleAddToCart = (productId: number) => {
+    const product = products.data.find((p) => p.id === productId);
     setProcessing(true);
+    
     router.post(
       cartRoutes.store.url(),
       {
@@ -47,6 +61,12 @@ export default function ProductsIndex({ products }: Props) {
       },
       {
         preserveScroll: true,
+        onSuccess: () => {
+          showToast(`${product?.name || 'Product'} added to cart!`, 'success');
+        },
+        onError: () => {
+          showToast('Failed to add product to cart', 'error');
+        },
         onFinish: () => {
           setProcessing(false);
         },
@@ -62,7 +82,17 @@ export default function ProductsIndex({ products }: Props) {
         <div className="flex justify-between items-center mb-6">
           <Heading>Browse Products</Heading>
           <Link href={cartRoutes.index.url()}>
-            <Button variant="outline">View Cart</Button>
+            <Button variant="outline" className="relative">
+              View Cart
+              {cartCount > 0 && (
+                <Badge 
+                  variant="default" 
+                  className="ml-2 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full"
+                >
+                  {cartCount}
+                </Badge>
+              )}
+            </Button>
           </Link>
         </div>
 

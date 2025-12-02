@@ -14,6 +14,7 @@ import { useState } from 'react';
 import cart from '@/routes/cart';
 import orders from '@/routes/orders';
 import products from '@/routes/products';
+import { showToast } from '@/components/toast-container';
 
 interface Product {
   id: number;
@@ -45,15 +46,21 @@ export default function CartIndex({ cartItems, total }: Props) {
       { quantity },
       {
         preserveScroll: true,
+        onSuccess: () => {
+          showToast('Cart updated successfully', 'success');
+        },
         onFinish: () => setUpdatingItem(null),
       }
     );
   };
 
-  const handleRemoveItem = (itemId: number) => {
+  const handleRemoveItem = (itemId: number, productName: string) => {
     if (confirm('Remove this item from your cart?')) {
       router.delete(cart.destroy.url(itemId), {
         preserveScroll: true,
+        onSuccess: () => {
+          showToast(`${productName} removed from cart`, 'success');
+        },
       });
     }
   };
@@ -159,7 +166,7 @@ export default function CartIndex({ cartItems, total }: Props) {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={() => handleRemoveItem(item.id, item.product.name)}
                         >
                           Remove
                         </Button>

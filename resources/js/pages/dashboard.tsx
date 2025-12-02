@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import products from '@/routes/products';
@@ -17,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, cartCount } = usePage<SharedData>().props;
     const isAdmin = (auth?.user as { is_admin?: boolean })?.is_admin || false;
 
     return (
@@ -52,7 +53,17 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent>
                             <Link href={cart.index.url()}>
-                                <Button className="w-full" variant="outline">View Cart</Button>
+                                <Button className="w-full relative" variant="outline">
+                                    View Cart
+                                    {cartCount > 0 && (
+                                        <Badge 
+                                            variant="default" 
+                                            className="ml-2 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full"
+                                        >
+                                            {cartCount}
+                                        </Badge>
+                                    )}
+                                </Button>
                             </Link>
                         </CardContent>
                     </Card>
