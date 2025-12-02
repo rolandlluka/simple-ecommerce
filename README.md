@@ -6,12 +6,15 @@ A clean, modern shopping cart system built with Laravel 12, React 18, Inertia.js
 
 ### User Features
 - 🛍️ Browse products with pagination
+- 🔍 View individual product details
 - 🛒 Add products to cart (database-backed, not session-based)
 - ✏️ Update cart item quantities
 - 🗑️ Remove items from cart
 - 📦 Checkout and place orders
 - 📋 View order history
 - 🔐 User authentication (Laravel Fortify + React + Inertia)
+- 🔔 Toast notifications for cart actions
+- 🏷️ Cart count badge on navigation
 
 ### Admin Features
 - 👨‍💼 Admin role management
@@ -113,6 +116,25 @@ app/
     ├── LowStockNotification.php         # Low stock email
     └── DailySalesReport.php             # Daily sales report email
 
+database/
+└── factories/
+    ├── UserFactory.php                   # User factory
+    ├── ProductFactory.php                # Product factory
+    ├── OrderFactory.php                  # Order factory
+    └── OrderItemFactory.php              # OrderItem factory
+
+tests/
+└── Feature/
+    ├── ProductControllerTest.php          # Product browsing tests
+    ├── CartControllerTest.php            # Cart operations tests
+    ├── OrderControllerTest.php           # Order & checkout tests
+    ├── AdminMiddlewareTest.php            # Admin authorization tests
+    ├── Admin/
+    │   └── ProductControllerTest.php     # Admin product management tests
+    └── Jobs/
+        ├── LowStockNotificationJobTest.php    # Low stock job tests
+        └── DailySalesReportJobTest.php        # Daily sales report job tests
+
 resources/js/pages/
 ├── admin/products/                      # Admin product management pages
 │   ├── index.tsx                        # List products
@@ -164,10 +186,35 @@ MAIL_FROM_ADDRESS="noreply@example.com"
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-For development, you can use [Mailtrap](https://mailtrap.io/) or log driver:
+For development, you can use:
+
+**Option 1: MailHog (Local SMTP Server)**
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+```
+Then start MailHog: `mailhog` (or `brew services start mailhog` on macOS)
+View emails at: http://localhost:8025
+
+**Option 2: Mailtrap**
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your-mailtrap-username
+MAIL_PASSWORD=your-mailtrap-password
+MAIL_ENCRYPTION=tls
+```
+
+**Option 3: Log Driver (for testing)**
 ```env
 MAIL_MAILER=log
 ```
+Emails will be written to `storage/logs/laravel.log`
 
 ## Routes
 
@@ -179,6 +226,7 @@ MAIL_MAILER=log
 ### Authenticated User Routes
 - `GET /dashboard` - User dashboard
 - `GET /products` - Browse products
+- `GET /products/{product}` - View product details
 - `GET /cart` - View shopping cart
 - `POST /cart` - Add item to cart
 - `PUT /cart/{cartItem}` - Update cart item quantity
@@ -210,13 +258,36 @@ composer dev
 
 ## Testing
 
+The project includes comprehensive test coverage with 87+ tests covering all major features:
+
 ```bash
-# Run tests
+# Run all tests
 composer test
 
 # Or
 php artisan test
+
+# Run specific test file
+php artisan test --filter=ProductControllerTest
+
+# Run specific test
+php artisan test --filter=test_user_can_add_product_to_cart
+
+# Run with coverage (if configured)
+php artisan test --coverage
 ```
+
+### Test Coverage
+
+- ✅ **ProductController** - Product browsing, filtering, pagination
+- ✅ **CartController** - Add, update, remove cart items, stock validation
+- ✅ **OrderController** - Checkout process, order viewing, stock management
+- ✅ **Admin ProductController** - CRUD operations, authorization
+- ✅ **Admin Middleware** - Access control and authorization
+- ✅ **LowStockNotificationJob** - Email notifications to admins
+- ✅ **DailySalesReportJob** - Daily sales report generation and email
+
+All tests use SQLite in-memory database and sync queue driver for fast execution.
 
 ## Database Schema
 
@@ -251,6 +322,9 @@ php artisan test
 ✅ Type-safe frontend with TypeScript
 ✅ Responsive design with TailwindCSS
 ✅ Component-based UI architecture
+✅ Comprehensive test suite (87+ tests)
+✅ Toast notifications for user feedback
+✅ Real-time cart count updates
 
 ## Contributing
 
