@@ -1,5 +1,5 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { AppLayout } from '@/layouts/app-layout';
 import { Heading } from '@/components/heading';
 import cartRoutes from '@/routes/cart';
@@ -37,18 +35,10 @@ interface Props {
 }
 
 export default function ProductsIndex({ products }: Props) {
-  const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
-  const { data, setData, post, processing, reset } = useForm({
-    product_id: 0,
-    quantity: 1,
-  });
+  const [processing, setProcessing] = useState(false);
 
   const handleAddToCart = (productId: number) => {
-    setData({
-      product_id: productId,
-      quantity: 1,
-    });
-    
+    setProcessing(true);
     router.post(
       cartRoutes.store.url(),
       {
@@ -57,8 +47,8 @@ export default function ProductsIndex({ products }: Props) {
       },
       {
         preserveScroll: true,
-        onSuccess: () => {
-          setSelectedProduct(null);
+        onFinish: () => {
+          setProcessing(false);
         },
       }
     );

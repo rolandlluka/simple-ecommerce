@@ -6,7 +6,7 @@ import products from '@/routes/products';
 import cart from '@/routes/cart';
 import orders from '@/routes/orders';
 import adminProducts from '@/routes/admin/products';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -17,8 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { auth } = usePage().props as any;
-    const isAdmin = auth?.user?.is_admin || false;
+    const { auth } = usePage<SharedData>().props;
+    const isAdmin = (auth?.user as { is_admin?: boolean })?.is_admin || false;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
